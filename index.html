@@ -17,6 +17,10 @@
 		<label for="tijd" class="left">Tijd:</label>
 		<input id="maxtijd" class="right input" type="text" required>
 		<br>
+		<input type="radio" name="mode" value="easy" checked>
+		<input type="radio" name="mode" value="normal">
+		<input type="radio" name="mode" value="hard">
+		<input type="radio" name="mode" value="insane">
 		&nbsp;
         <button id="submit" class="btn btn-default" onclick="Validate()">Begin!</button>
 		<p>
@@ -33,18 +37,34 @@
 	</div>
 
     <script>
+		//Amount of clicks on moles
 		var score = 0;
+
+		//Populated by generateboard with the board
         var places = [];
-		var time = 20;
-		var maxtime;
-		var grootte;
+
+		//Interval to update time every second
 		var timeInterval;
+		//Interval that spawns moles
 		var gameLoop;
-		var finished = false;
-		
-		var fadeTime = 500;
-		var stayDuration = 2000;
-		var moleInterval = 1000;
+
+		//Is the game in progress or on UI screen
+		var inProgress = false;
+
+		//Changed in ui, possibilities: easy, normal, hard, insane
+		var difficulty;
+
+		//Set at the beginning to the time var, used to record highscore
+		var maxtime;
+
+		//Changeable for different feel
+		var time = 40;
+
+		//Changed according to difficulty settings
+		var grootte;
+		var fadeTime = 2000;
+		var stayDuration = 3000;
+		var moleInterval = 3000;
 
 		if(localStorage.getItem('score') != null && localStorage.getItem('tijd') != null && localStorage.getItem('grootte') != null) 
 		{
@@ -56,11 +76,33 @@
 
         function Start()
         {
+			InitSettings();
 			DisplayUI();
             GenerateBoard();
             HideAll();
-            StartGame();
+            Loop();
+
+			inProgress = true;
         }
+
+		function InitSettings()
+		{
+			switch(document.querySelector('input[name="mode"]:checked').value) 
+			{
+				case "easy":
+				difficulty = "easy";
+				break;
+				case "normal":
+				difficulty = "normal";
+				break;
+				case "hard":
+				difficulty = "hard";
+				break;
+				case "insane":
+				difficulty = "insane";
+				break;
+			}
+		}
 
 		function DisplayUI() 
 		{
@@ -81,7 +123,6 @@
 		}
 
 		function Finished() {
-			finished = true;
 			clearInterval(timeInterval);
 			clearInterval(gameLoop);
 		}
@@ -152,13 +193,17 @@
 
         }
 
-        function StartGame()
+        function Loop()
         {
-            gameLoop = setInterval(function() {
-                var randomPlace = places[Math.floor(Math.random() * places.length)];
-                Show(randomPlace, stayDuration);
-            },moleInterval);
+            setTimeout(GameLoop, moleInterval);
         }
+
+		function GameLoop()
+		{
+			var randomPlace = places[Math.floor(Math.random() * places.length)];
+	        Show(randomPlace, stayDuration);
+			Loop();
+		}
 
 		function StopGame() 
 		{
@@ -178,7 +223,7 @@
 				localStorage.setItem('tijd', maxtime);
 				localStorage.setItem('grootte', grootte);
 			}
-
+			inProgress = false;
 			location.reload();
 		}
 
