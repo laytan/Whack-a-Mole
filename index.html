@@ -11,12 +11,6 @@
 </head>
 <body>
     <div id="options">
-		<label for="grootte" class="left">Bord grootte:</label>
-        <input id="grootte" class="right input" type="text" required>
-		<br>
-		<label for="tijd" class="left">Tijd:</label>
-		<input id="maxtijd" class="right input" type="text" required>
-		<br>
 		<input type="radio" name="mode" value="easy" checked>
 		<input type="radio" name="mode" value="normal">
 		<input type="radio" name="mode" value="hard">
@@ -51,20 +45,19 @@
 		//Is the game in progress or on UI screen
 		var inProgress = false;
 
-		//Changed in ui, possibilities: easy, normal, hard, insane
-		var difficulty;
-
 		//Set at the beginning to the time var, used to record highscore
 		var maxtime;
 
 		//Changeable for different feel
 		var time = 40;
 
+		//Changed in ui, possibilities: easy, normal, hard, insane
+		var difficulty;
 		//Changed according to difficulty settings
 		var grootte;
-		var fadeTime = 2000;
-		var stayDuration = 3000;
-		var moleInterval = 3000;
+		var fadeTime;
+		var stayDuration;
+		var moleInterval;
 
 		if(localStorage.getItem('score') != null && localStorage.getItem('tijd') != null && localStorage.getItem('grootte') != null) 
 		{
@@ -90,29 +83,50 @@
 			switch(document.querySelector('input[name="mode"]:checked').value) 
 			{
 				case "easy":
-				difficulty = "easy";
+					difficulty = "easy";
+					grootte = 3;
+					fadeTime = 1000;
+					stayDuration = 3000;
+					moleInterval = 3000;
 				break;
 				case "normal":
-				difficulty = "normal";
+					difficulty = "normal";
+					grootte = 4;
+					fadeTime = 500;
+					stayDuration = 2000;
+					moleInterval = 2000;
 				break;
 				case "hard":
-				difficulty = "hard";
+					difficulty = "hard";
+					grootte = 5;
+					fadeTime = 300;
+					stayDuration = 1000;
+					moleInterval = 1500;
 				break;
 				case "insane":
-				difficulty = "insane";
+					difficulty = "insane";
+					grootte = 5;
+					fadeTime = 100;
+					stayDuration = 500;
+					moleInterval = 1000;
 				break;
 			}
 		}
 
 		function DisplayUI() 
 		{
-			time = parseInt(document.getElementById('maxtijd').value);
+			//Prep maxtime variable for highscores before we change the time variable
 			maxtime = time;
+
+			//Display the UI
 			document.getElementById("ui").style.display = 'block';
-			timeInterval = setInterval(function() {updateTime()}, 1000);
+
+			//Run UpdateTime every second / 1000Milliseconds
+			timeInterval = setInterval(function() {UpdateTime()}, 1000);
 		}
 
-		function updateTime() {
+		function UpdateTime() {
+			//Subtracts a second from the time variable and updates it to the UI, if the time is 0 call the function Finished();
 			time--;
 			if(time < 0) {
 				Finished();
@@ -124,51 +138,67 @@
 
 		function Finished() {
 			clearInterval(timeInterval);
-			clearInterval(gameLoop);
+			//TODO: Stop the game from spawning new moles @ Gameloop function
 		}
 
         function GenerateBoard()
         {
-            var size = parseInt(document.getElementById('grootte').value);
-			grootte = size;
+			//Element where the board will go
             var board = document.getElementById('board');
-            document.getElementById('options').style.display = 'none';
 
-            for (var i = 0; i < size; i++)
+			//Hide the options element
+            document.getElementById('options').style.display = 'none';
+			
+            for (var i = 0; i < grootte; i++)
             {
-                for (var j = 0; j < size; j++)
+				//i = 0 increments every time
+                for (var j = 0; j < grootte; j++)
                 {
+					//j = 0 increments every time
+
+					//Like: 00, 01, 02, 03, 10, 11, 12, 13
                     var coord = i.toString() + j.toString();
+					//Make a div with a mole's image and the id of the current coord
                     board.innerHTML += '<div id="' + coord + '" class="place"><img id="Img_' + coord + '" class="molImg" onclick="MoleClick(this)" src="Mol.png"></div>';
+					//Put the id / coord in the array so we can acces the moles
                     places.push(coord);
                 }
+				//Break every time we reach the end of the x axis, so the program begins on a new line
                 board.innerHTML += '<br>';
             }
-            $('.place').css('width', (100 / size).toString() + '%');
-            $('.place').css('height', (100 / size).toString() + 'vh');
+			//Scale the moles so they fit a full screen view
+			//TODO: plain javascript, get rid of JQuery
+            $('.place').css('width', (100 / grootte).toString() + '%');
+            $('.place').css('height', (100 / grootte).toString() + 'vh');
         }
 
         function HideAll()
         {
+			//Loop through all moles and call the Hide function on them
             for (var i = 0; i < places.length; i++) {
                 Hide(places[i]);
             }
         }
 
-        function Hide(placeClass)
+        function Hide(divID)
         {
-            $('#' + placeClass).fadeTo(fadeTime, 0);
+			//TODO: plain Javascript, get rid of JQuery
+			//Fades out the div containing the mole
+            $('#' + divID).fadeTo(fadeTime, 0);
         }
 
-        function Show(placeClass, duration)
+        function Show(divID, duration)
         {
-            $('#' + placeClass).fadeTo(fadeTime, 1, waitAndHide());
+			//TODO: plain javascript, get rid of JQuery
+			//Fades in the div containing a mole at the coord divID and calls waitAndHide() after that
+            $('#' + divID).fadeTo(fadeTime, 1, waitAndHide());
 
             function waitAndHide()
             {
+				//Runs the Hide function on the div with the mole after a duration
                 setTimeout(
                     function() {
-                        Hide(placeClass);
+                        Hide(divID);
                     }
                 , duration);
             }
@@ -185,7 +215,6 @@
 			}
         }
 
-     
         function Hit()
         {
             score++;
@@ -229,18 +258,7 @@
 
 		function Validate()
 		{
-			var grootte = document.getElementById('grootte').value;
-			var tijd = document.getElementById('maxtijd').value;
-			var regex = /[^0-9]/;
-			
-			if(!regex.test(grootte) && !regex.test(tijd))
-			{
-				Start();
-			}
-			else 
-			{
-				alert('Vul alstublieft alleen nummers in!');
-			}
+			Start();
 		}
     </script>
 </body>
