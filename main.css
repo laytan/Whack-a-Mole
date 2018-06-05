@@ -1,0 +1,116 @@
+.place
+{
+    text-align: center;
+    display: inline-block;
+    overflow: hidden;
+}
+
+#board
+{
+    width: 100%;
+}
+
+#molImg
+{
+    max-width:100%;
+    max-height:100%;
+    overflow: hidden;
+}
+
+#ui 
+{
+	display: none;
+}
+
+#score 
+{
+	position: fixed;
+	bottom: 0;
+	left: 50%;
+}
+
+#tijd
+{
+	position: fixed;
+	bottom:0;
+	right:.2em;
+}
+
+#options
+{
+	border: 10px solid black;
+	border-radius: 30px;
+	padding: 2%;
+	margin-top: 20vh;
+	width: 20%;
+	margin-left: 40%;
+	margin-right: 40%;
+	font-size: 1.2em;
+	background-color: yellow;
+}	
+
+.left
+{	
+	width: 40%;
+}
+
+.right
+{
+	width: 40%;
+	margin-left: 30%;
+}
+
+#submit
+{
+	width: 40%;
+	margin-left: 30%;
+	margin-right: 30%;
+	background-color: black;
+	color: white;
+	border-color: grey;
+	border-width: 3px;
+	font-size: 1em;
+}
+
+#submit:hover
+{
+	background-color: yellow;
+	color: black;
+	border-color: black;
+}
+
+#scores
+{
+	font-size: 1.5em;
+}	
+
+.input
+{
+	background-color: black;
+	color: white;
+	border: none;
+	width: 4em;
+	text-align:center;
+}
+
+#stop
+{
+	color: black;
+	background-color: yellow;
+	border-color: black;
+	position: fixed;
+	left: .2em;
+	bottom: .2em;
+}
+
+#stop:hover
+{
+	color: white;
+	background-color: black;
+	border-color: yellow;
+}
+
+.uiText
+{
+	font-size: 2em;
+}

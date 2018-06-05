@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <title>Whack-A-Mole</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="main.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div id="options">
+		<label for="grootte" class="left">Bord grootte:</label>
+        <input id="grootte" class="right input" type="text" required>
+		<br>
+		<label for="tijd" class="left">Tijd:</label>
+		<input id="maxtijd" class="right input" type="text" required>
+		<br>
+		&nbsp;
+        <button id="submit" class="btn btn-default" onclick="Validate()">Begin!</button>
+		<p>
+		<h1>Highscore</h1>
+		<span id="scores"></span>
+		</p>
+    </div>
+
+    <div id="board"></div>
+	<div id="ui">
+		<button id="stop" class="btn btn-lg" onclick="StopGame()">Stop</button>
+		<p id="score" class="uiText">0</p>
+		<p id="tijd" class="uiText">20</p>
+	</div>
+
+    <script>
+		var score = 0;
+        var places = [];
+		var time = 20;
+		var maxtime;
+		var grootte;
+		var timeInterval;
+		var gameLoop;
+		var finished = false;
+		var stayDuration = 500;
+
+		if(localStorage.getItem('score') != null && localStorage.getItem('tijd') != null && localStorage.getItem('grootte') != null) 
+		{
+			var highscore = localStorage.getItem('score');
+			var tijd = localStorage.getItem('tijd');
+			var grootte = localStorage.getItem('grootte');
+			document.getElementById("scores").innerHTML = 'Score: ' + highscore + '<br>Tijd: ' + tijd + '<br>Grootte: ' + grootte;
+		}
+
+        function Start()
+        {
+			DisplayUI();
+            GenerateBoard();
+            HideAll();
+            StartGame();
+        }
+
+		function DisplayUI() 
+		{
+			time = parseInt(document.getElementById('maxtijd').value);
+			maxtime = time;
+			document.getElementById("ui").style.display = 'block';
+			timeInterval = setInterval(function() {updateTime()}, 1000);
+		}
+
+		function updateTime() {
+			time--;
+			if(time < 0) {
+				Finished();
+			}
+			else {
+				document.getElementById("tijd").innerHTML = time.toString();
+			}
+		}
+
+		function Finished() {
+			finished = true;
+			clearInterval(timeInterval);
+			clearInterval(gameLoop);
+		}
+
+        function GenerateBoard()
+        {
+            var size = parseInt(document.getElementById('grootte').value);
+			grootte = size;
+            var board = document.getElementById('board');
+            document.getElementById('options').style.display = 'none';
+
+            for (var i = 0; i < size; i++)
+            {
+                for (var j = 0; j < size; j++)
+                {
+                    var coord = i.toString() + j.toString();
+                    board.innerHTML += '<div id="' + coord + '" class="place"><img id="Img_' + coord + '" class="molImg" onclick="MoleClick(this)" src="Mol.png"></div>';
+                    places.push(coord);
+                }
+                board.innerHTML += '<br>';
+            }
+            $('.place').css('width', (100 / size).toString() + '%');
+            $('.place').css('height', (100 / size).toString() + 'vh');
+        }
+
+        function HideAll()
+        {
+            for (var i = 0; i < places.length; i++) {
+                Hide(places[i]);
+            }
+        }
+
+        function Hide(placeClass)
+        {
+            $('#' + placeClass).fadeTo(500, 0);
+        }
+
+        function Show(placeClass, duration)
+        {
+            $('#' + placeClass).fadeTo(500, 1, waitAndHide());
+
+            function waitAndHide()
+            {
+                setTimeout(
+                    function() {
+                        Hide(placeClass);
+                    }
+                , duration);
+            }
+        }
+
+        function MoleClick(event)
+        {
+			var id = event.id;
+			var parent = id.split('_')[1];
+			var opacity = window.getComputedStyle(document.getElementById(parent), null).opacity;
+
+			if(opacity > 0) {
+				Hit();
+			}
+        }
+
+     
+        function Hit()
+        {
+            score++;
+			document.getElementById("score").innerHTML = score.toString();
+
+        }
+
+        function StartGame()
+        {
+            gameLoop = setInterval(function() {
+                var randomPlace = places[Math.floor(Math.random() * places.length)];
+                Show(randomPlace, stayDuration);
+            },1000);
+        }
+
+		function StopGame() 
+		{
+			if(localStorage.getItem('score') != null && localStorage.getItem('tijd') != null && localStorage.getItem('grootte') != null) 
+			{
+				var highscore = localStorage.getItem('score');
+				if(score > highscore) 
+				{
+					localStorage.setItem('score', score);
+					localStorage.setItem('tijd', maxtime);
+					localStorage.setItem('grootte', grootte);
+				}
+			}
+			else 
+			{
+				localStorage.setItem('score', score);
+				localStorage.setItem('tijd', maxtime);
+				localStorage.setItem('grootte', grootte);
+			}
+
+			location.reload();
+		}
+
+		function Validate()
+		{
+			var grootte = document.getElementById('grootte').value;
+			var tijd = document.getElementById('maxtijd').value;
+			var regex = /[^0-9]/;
+			
+			if(!regex.test(grootte) && !regex.test(tijd))
+			{
+				Start();
+			}
+			else 
+			{
+				alert('Vul alstublieft alleen nummers in!');
+			}
+		}
+    </script>
+</body>
+</html>
