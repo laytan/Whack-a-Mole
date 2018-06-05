@@ -45,11 +45,11 @@
 		//Is the game in progress or on UI screen
 		var inProgress = false;
 
-		//Set at the beginning to the time var, used to record highscore
-		var maxtime;
+		//Time the game runs for
+		var maxTime = 10;
 
-		//Changeable for different feel
-		var time = 40;
+		//== maxTime at the start of the game, so we know how long this game lasts
+		var timeLeft;
 
 		//Changed in ui, possibilities: easy, normal, hard, insane
 		var difficulty;
@@ -81,8 +81,6 @@
             HideAll();
 			//Main loop to make moles appear and dissappear
             Loop();
-
-			inProgress = true;
         }
 
 		function InitSettings()
@@ -122,15 +120,13 @@
 		}
 
 		function DisplayUI() 
-		{	/*TODO: change time to timeLeft
-		 	and set maxTime in difficulty setting
-			and clone timeLeft to maxTime
+		{	
+			// Set timeLeft to the maxTime for this game so we can do calculations with it
+			timeLeft = maxTime;
 
-			Prep maxtime variable for highscores
-			before we change the time variable */
-			maxtime = time;
-
-			//Display the UI
+			//Hide the options element
+            document.getElementById('options').style.display = 'none';
+			//Display the game UI
 			document.getElementById("ui").style.display = 'block';
 
 			//Run UpdateTime every second / 1000Milliseconds
@@ -138,30 +134,30 @@
 		}
 
 		function UpdateTime() {
-			/*Subtracts a second from the time variable 
-			and updates it to the UI, if the time is 0 call the function Finished();*/
-			time--;
-			if(time < 0) {
+			/*Subtracts a second from the timeLeft variable 
+			and updates it to the UI, if the timeLeft is 0 call the function Finished();*/
+			timeLeft--;
+			if(timeLeft < 0) {
 				Finished();
 			}
 			else {
-				document.getElementById("tijd").innerHTML = time.toString();
+				document.getElementById("tijd").innerHTML = timeLeft.toString();
 			}
 		}
 
 		function Finished() {
+			//Stop the timeLeft from counting and stop the gameloop
 			clearInterval(timeInterval);
-			//TODO: Stop the game from spawning new moles @ Gameloop function
+			inProgress = false;
 		}
 
         function GenerateBoard()
         {
+			//sets game to be started
+			inProgress = true;
 			//Element where the board will go
             var board = document.getElementById('board');
 
-			//Hide the options element TODO: put in different function
-            document.getElementById('options').style.display = 'none';
-			
             for (var i = 0; i < grootte; i++)
             {
 				//i = 0 increments every time
@@ -244,13 +240,17 @@
 
         }
 
-        function Loop()
+        function WaitAndShowRandomMole()
         {
-			//Start the gameloop that 'spawns' moles
-            setTimeout(GameLoop, moleInterval);
+			//If the game is running
+			if(inProgress)
+			{
+				//Spawn a mole after a delay
+            	setTimeout(ShowRandomMole, moleInterval);
+			}
         }
 
-		function GameLoop()
+		function ShowRandomMole()
 		{
 			/*Choose a random place, call Show() on it
 			and make this run again by calling Loop()*/
