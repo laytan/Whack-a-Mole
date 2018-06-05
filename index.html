@@ -80,7 +80,7 @@
             GenerateBoard();
             HideAll();
 			//Main loop to make moles appear and dissappear
-            Loop();
+            WaitAndShowRandomMole();
         }
 
 		function InitSettings()
@@ -253,10 +253,10 @@
 		function ShowRandomMole()
 		{
 			/*Choose a random place, call Show() on it
-			and make this run again by calling Loop()*/
+			and make this run again by calling WaitAndShowRandomMole()*/
 			var randomPlace = places[Math.floor(Math.random() * places.length)];
 	        Show(randomPlace, stayDuration);
-			Loop();
+			WaitAndShowRandomMole();
 		}
 
 		function StopGame() 
