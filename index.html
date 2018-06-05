@@ -41,7 +41,10 @@
 		var timeInterval;
 		var gameLoop;
 		var finished = false;
-		var stayDuration = 500;
+		
+		var fadeTime = 500;
+		var stayDuration = 2000;
+		var moleInterval = 1000;
 
 		if(localStorage.getItem('score') != null && localStorage.getItem('tijd') != null && localStorage.getItem('grootte') != null) 
 		{
@@ -113,12 +116,12 @@
 
         function Hide(placeClass)
         {
-            $('#' + placeClass).fadeTo(500, 0);
+            $('#' + placeClass).fadeTo(fadeTime, 0);
         }
 
         function Show(placeClass, duration)
         {
-            $('#' + placeClass).fadeTo(500, 1, waitAndHide());
+            $('#' + placeClass).fadeTo(fadeTime, 1, waitAndHide());
 
             function waitAndHide()
             {
@@ -154,7 +157,7 @@
             gameLoop = setInterval(function() {
                 var randomPlace = places[Math.floor(Math.random() * places.length)];
                 Show(randomPlace, stayDuration);
-            },1000);
+            },moleInterval);
         }
 
 		function StopGame() 
