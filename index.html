@@ -59,20 +59,27 @@
 		var stayDuration;
 		var moleInterval;
 
-		if(localStorage.getItem('score') != null && localStorage.getItem('tijd') != null && localStorage.getItem('grootte') != null) 
+		if(localStorage.getItem('score') != null 
+		&& localStorage.getItem('tijd') != null 
+		&& localStorage.getItem('grootte') != null) 
 		{
+			//If we have a highscore, populate the scores div with the highscore
 			var highscore = localStorage.getItem('score');
 			var tijd = localStorage.getItem('tijd');
 			var grootte = localStorage.getItem('grootte');
-			document.getElementById("scores").innerHTML = 'Score: ' + highscore + '<br>Tijd: ' + tijd + '<br>Grootte: ' + grootte;
+			document.getElementById("scores").innerHTML = 'Score: ' + highscore +
+														 '<br>Tijd: ' + tijd +
+														  '<br>Grootte: ' + grootte;
 		}
 
         function Start()
         {
+			//Difficulty and variable initializer
 			InitSettings();
 			DisplayUI();
             GenerateBoard();
             HideAll();
+			//Main loop to make moles appear and dissappear
             Loop();
 
 			inProgress = true;
@@ -80,6 +87,7 @@
 
 		function InitSettings()
 		{
+			//Switch trough checked difficulty and change variables according to it
 			switch(document.querySelector('input[name="mode"]:checked').value) 
 			{
 				case "easy":
@@ -114,8 +122,12 @@
 		}
 
 		function DisplayUI() 
-		{
-			//Prep maxtime variable for highscores before we change the time variable
+		{	/*TODO: change time to timeLeft
+		 	and set maxTime in difficulty setting
+			and clone timeLeft to maxTime
+
+			Prep maxtime variable for highscores
+			before we change the time variable */
 			maxtime = time;
 
 			//Display the UI
@@ -126,7 +138,8 @@
 		}
 
 		function UpdateTime() {
-			//Subtracts a second from the time variable and updates it to the UI, if the time is 0 call the function Finished();
+			/*Subtracts a second from the time variable 
+			and updates it to the UI, if the time is 0 call the function Finished();*/
 			time--;
 			if(time < 0) {
 				Finished();
@@ -146,7 +159,7 @@
 			//Element where the board will go
             var board = document.getElementById('board');
 
-			//Hide the options element
+			//Hide the options element TODO: put in different function
             document.getElementById('options').style.display = 'none';
 			
             for (var i = 0; i < grootte; i++)
@@ -158,8 +171,12 @@
 
 					//Like: 00, 01, 02, 03, 10, 11, 12, 13
                     var coord = i.toString() + j.toString();
-					//Make a div with a mole's image and the id of the current coord
-                    board.innerHTML += '<div id="' + coord + '" class="place"><img id="Img_' + coord + '" class="molImg" onclick="MoleClick(this)" src="Mol.png"></div>';
+
+					/*Make a div with a mole's image
+					 and the id of the current coord */
+                    board.innerHTML += '<div id="' + coord + '" class="place">' +
+											'<img id="Img_' + coord + '" class="molImg" onclick="MoleClick(this)" src="Mol.png">' +
+										'</div>';
 					//Put the id / coord in the array so we can acces the moles
                     places.push(coord);
                 }
@@ -189,8 +206,9 @@
 
         function Show(divID, duration)
         {
-			//TODO: plain javascript, get rid of JQuery
-			//Fades in the div containing a mole at the coord divID and calls waitAndHide() after that
+			/*TODO: plain javascript, get rid of JQuery
+			Fades in the div containing a mole at the coord divID
+			and calls waitAndHide() after that */
             $('#' + divID).fadeTo(fadeTime, 1, waitAndHide());
 
             function waitAndHide()
@@ -206,10 +224,13 @@
 
         function MoleClick(event)
         {
+			/*get id of the mole that called the function and get its parent
+			by splitting Img_ and the coord*/
 			var id = event.id;
 			var parent = id.split('_')[1];
+			//Get the opacity of this parent
 			var opacity = window.getComputedStyle(document.getElementById(parent), null).opacity;
-
+			//If its more then 0, the hit is verified
 			if(opacity > 0) {
 				Hit();
 			}
@@ -217,6 +238,7 @@
 
         function Hit()
         {
+			//Add to the score and update the UI
             score++;
 			document.getElementById("score").innerHTML = score.toString();
 
@@ -224,11 +246,14 @@
 
         function Loop()
         {
+			//Start the gameloop that 'spawns' moles
             setTimeout(GameLoop, moleInterval);
         }
 
 		function GameLoop()
 		{
+			/*Choose a random place, call Show() on it
+			and make this run again by calling Loop()*/
 			var randomPlace = places[Math.floor(Math.random() * places.length)];
 	        Show(randomPlace, stayDuration);
 			Loop();
@@ -236,8 +261,10 @@
 
 		function StopGame() 
 		{
+			//Called by the stop button in the UI
 			if(localStorage.getItem('score') != null && localStorage.getItem('tijd') != null && localStorage.getItem('grootte') != null) 
 			{
+				//If the highscore is less then this score, change the highscores to this session
 				var highscore = localStorage.getItem('score');
 				if(score > highscore) 
 				{
@@ -248,10 +275,12 @@
 			}
 			else 
 			{
+				//If there was no score to compare to this is automatically the highscore
 				localStorage.setItem('score', score);
 				localStorage.setItem('tijd', maxtime);
 				localStorage.setItem('grootte', grootte);
 			}
+			//End game and reload window to get back to start conditions
 			inProgress = false;
 			location.reload();
 		}
