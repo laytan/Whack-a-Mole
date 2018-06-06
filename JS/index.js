@@ -4,10 +4,14 @@ window.onload = Start();
 function Start()
 {
     LoadHighscores();
+
+    //Setup click handler
+    document.getElementById("start_game").addEventListener("click", StartBtnClick);
 }
 
 function LoadHighscores()
 {
+    //document.getElementById("highscore_score").innerHTML = (localStorage.getItem("score") == null) ? "/" : localStorage.getItem("score");
     //Get the local highscore
     var highScore_score = localStorage.getItem("score");
     var highScore_time = localStorage.getItem("tijd");
@@ -20,4 +24,14 @@ function LoadHighscores()
     target_score.innerHTML = (highScore_score == null) ? "/" : highScore_score;
     target_size.innerHTML = (highScore_size == null) ? "/" : highScore_size;
     target_time.innerHTML = (highScore_time == null) ? "/" : highScore_time;
+}
+
+function StartBtnClick()
+{
+    /*Get the inputs
+    Put inputs in localStorage
+    Redirect to main.html*/
+    var selectedDifficulty = document.querySelector('input[name="mode"]:checked').value;
+    localStorage.setItem("difficulty", selectedDifficulty);
+    location.href = 'main.html';
 }

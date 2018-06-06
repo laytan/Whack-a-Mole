@@ -1,5 +1,4 @@
-
-//Amount of clicks on moles
+		//Amount of clicks on moles
 		var score = 0;
 
 		//Populated by generateboard with the board
@@ -10,8 +9,8 @@
 		//Interval that spawns moles
 		var gameLoop;
 
-		//Is the game in progress or on UI screen
-		var inProgress = false;
+		//Is the game in progress or done?
+		var spawnMoles = false;
 
 		//Time the game runs for
 		var maxTime = 10;
@@ -27,34 +26,31 @@
 		var stayDuration;
 		var moleInterval;
 
-		if(localStorage.getItem('score') != null 
-		&& localStorage.getItem('tijd') != null 
-		&& localStorage.getItem('grootte') != null) 
-		{
-			//If we have a highscore, populate the scores div with the highscore
-			var highscore = localStorage.getItem('score');
-			var tijd = localStorage.getItem('tijd');
-			var grootte = localStorage.getItem('grootte');
-			document.getElementById("scores").innerHTML = 'Score: ' + highscore +
-														 '<br>Tijd: ' + tijd +
-														  '<br>Grootte: ' + grootte;
-		}
+//Call start when loaded
+window.onload = Start();
 
         function Start()
         {
-			//Difficulty and variable initializer
-			InitSettings();
-			DisplayUI();
-            GenerateBoard();
-            HideAll();
+			SetDifficulty();
+			GenerateBoard();
+			HideAll();
+
+			//Makes moles spawnable
+			spawnMoles = true;
+			//Run UpdateTime every second / 1000Milliseconds
+			timeInterval = setInterval(function() {UpdateTime()}, 1000);
 			//Main loop to make moles appear and dissappear
             WaitAndShowRandomMole();
         }
 
-		function InitSettings()
+		function SetDifficulty()
 		{
-			//Switch trough checked difficulty and change variables according to it
-			switch(document.querySelector('input[name="mode"]:checked').value) 
+			// Set timeLeft to the maxTime for this game so we can do calculations with it
+			timeLeft = maxTime;
+
+			/*Get difficulty cheched on other page and
+			switch trough checked difficulty and change variables according to it */
+			switch(localStorage.getItem("difficulty")) 
 			{
 				case "easy":
 					difficulty = "easy";
@@ -84,45 +80,34 @@
 					stayDuration = 500;
 					moleInterval = 1000;
 				break;
+				default: 
+					//Geen difficulty meegekregen dus stop dit script
+					document.getElementById('board').innerHTML = '<p>Something went wrong, <a href="index.html">Go back.</a></p>';
+					throw new Error("No difficulty could be retrieved");
+				break;
 			}
-		}
-
-		function DisplayUI() 
-		{	
-			// Set timeLeft to the maxTime for this game so we can do calculations with it
-			timeLeft = maxTime;
-
-			//Hide the options element
-            document.getElementById('options').style.display = 'none';
-			//Display the game UI
-			document.getElementById("ui").style.display = 'block';
-
-			//Run UpdateTime every second / 1000Milliseconds
-			timeInterval = setInterval(function() {UpdateTime()}, 1000);
 		}
 
 		function UpdateTime() {
 			/*Subtracts a second from the timeLeft variable 
-			and updates it to the UI, if the timeLeft is 0 call the function Finished();*/
+			and updates it to the UI, if the timeLeft is 0 call the function TimeUp();*/
 			timeLeft--;
 			if(timeLeft < 0) {
-				Finished();
+				TimeUp();
 			}
 			else {
 				document.getElementById("tijd").innerHTML = timeLeft.toString();
 			}
 		}
 
-		function Finished() {
-			//Stop the timeLeft from counting and stop the gameloop
+		function TimeUp() {
+			//Stop the timeLeft from counting and stop spawning moles
 			clearInterval(timeInterval);
-			inProgress = false;
+			spawnMoles = false;
 		}
 
         function GenerateBoard()
         {
-			//sets game to be started
-			inProgress = true;
 			//Element where the board will go
             var board = document.getElementById('board');
 
@@ -189,8 +174,9 @@
 			by splitting Img_ and the coord*/
 			var id = event.id;
 			var parent = id.split('_')[1];
+			parent = document.getElementById(parent);
 			//Get the opacity of this parent
-			var opacity = window.getComputedStyle(document.getElementById(parent), null).opacity;
+			var opacity = window.getComputedStyle(parent, null).opacity;
 			//If its more then 0, the hit is verified
 			if(opacity > 0) {
 				Hit();
@@ -208,7 +194,7 @@
         function WaitAndShowRandomMole()
         {
 			//If the game is running
-			if(inProgress)
+			if(spawnMoles)
 			{
 				//Spawn a mole after a delay
             	setTimeout(ShowRandomMole, moleInterval);
@@ -226,31 +212,26 @@
 
 		function StopGame() 
 		{
-			//Called by the stop button in the UI
-			if(localStorage.getItem('score') != null && localStorage.getItem('tijd') != null && localStorage.getItem('grootte') != null) 
+			if(timeLeft <= 0)
 			{
-				//If the highscore is less then this score, change the highscores to this session
-				var highscore = localStorage.getItem('score');
-				if(score > highscore) 
-				{
-					localStorage.setItem('score', score);
-					localStorage.setItem('tijd', maxtime);
-					localStorage.setItem('grootte', grootte);
-				}
+				UpdateHighScores();
 			}
-			else 
-			{
-				//If there was no score to compare to this is automatically the highscore
-				localStorage.setItem('score', score);
-				localStorage.setItem('tijd', maxtime);
-				localStorage.setItem('grootte', grootte);
-			}
-			//End game and reload window to get back to start conditions
-			inProgress = false;
-			location.reload();
+			//End game go to main page to get back to start conditions
+			spawnMoles = false;
+			location.href = "index.html";
 		}
 
-		function Validate()
+		function UpdateHighScores()
 		{
-			Start();
+			//Get the current highscore
+			var highscore_score = localStorage.getItem("score");
+
+			//Check if this highscore is null (No highscore yet) Or if our score is higher then the highscore
+			if(highscore_score == null || highscore > score)
+			{
+				//If this score was higher then the current highest
+				localStorage.setItem("score", score);
+				localStorage.setItem("tijd", maxTime);
+				localStorage.setItem("grootte", grootte);
+			}
 		}
