@@ -17,11 +17,6 @@
     overflow: hidden;
 }
 
-#ui 
-{
-	display: none;
-}
-
 #score 
 {
 	position: fixed;
